@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스미싱 방지 퀴즈</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            transition: background 0.3s ease-in-out;
+        }
+        #quizContainer {
+            background: rgba(45, 15, 15, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(255, 60, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 800px;
+        }
+        .contentContainer {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            width: 100%;
+        }
+        .leftColumn, .rightColumn {
+            flex: 1;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #FF7070;
+            text-align: center;
+        }
+        p {
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        #phone {
+            width: 100%;
+            max-width: 300px;
+            height: 500px;
+            background: #3f3d3d;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+        }
+        #statusBar {
+            height: 30px;
+            background: #343333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 12px;
+        }
+        #messages {
+            flex: 1;
+            background: #f5f5f5;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .message.sender {
+            background: #d1e7ff;
+            align-self: flex-end;
+            color: #000;
+        }
+        .message.receiver {
+            background: #fff;
+            border: 1px solid #ccc;
+            align-self: flex-start;
+            color: #000;
+        }
+        button {
+            margin: 10px 5px;
+            padding: 12px 20px;
+            border: 2px solid #FF7070;
+            border-radius: 20px;
+            background-color: transparent;
+            color: #FF7070;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #FF7070;
+            color: white;
+            transform: scale(1.1);
+        }
+        .rightColumn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body id="background" style="background-image: url('background2.png');">
+    <div id="quizContainer">
+        <h2>위기 상황: 데이터 센터에 메시지 도착!</h2>
+        <div class="contentContainer">
+            <!-- 왼쪽 스마트폰 화면 -->
+            <div class="leftColumn">
+                <div id="phone">
+                    <div id="statusBar">
+                        <span>10:45 AM</span>
+                        <span>LTE</span>
+                        <span>🔋 85%</span>
+                    </div>
+                    <div id="messages">
+                        <div class="message receiver">
+                            [택배 배송 알림] 고객님의 택배 <br>배송이 지연되었습니다.<br>
+                            아래 링크를 클릭하여 <br>배송 상태를 확인하세요.<br>
+                            <strong>http://fake-delivery.kr</strong>
+                        </div>
+                        <div class="message sender">이거 어떻게 해야 하지?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽 선택지 -->
+            <div class="rightColumn">
+                <p>이러한 메시지를 받았을 때,<br> 취하지 않아야 할 행동은 무엇입니까까?</p>
+                <button onclick="checkAnswer('official')">1. 공식 홈페이지에서 배송 상태를 확인한다.</button>
+                <button onclick="checkAnswer('click')">2. 클릭해서 확인해본다.</button>
+                <button onclick="checkAnswer('doubt')">3. 자신이 시킨 택배사가 맞는지 의심한다.</button>
+                <button onclick="checkAnswer('block')">4. 메시지를 차단하고 삭제한다.</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer(selectedOption) {
+            if (selectedOption === 'click') {
+                alert('정답입니다! 스미싱 메시지로 의심되는 링크는 절대 클릭하지 마세요. 다음 단계로 넘어갑니다. 🎉🎊');
+                window.location.href = 'stage3.html'; // 다음 스테이지로 이동
+            } else if (selectedOption === 'official') {
+                alert('공식 홈페이지에서 배송 상태를 확인하는 것은 올바른 행동입니다.');
+            } else if (selectedOption === 'doubt') {
+                alert('자신이 시킨 택배인지 확인하는 것은 안전한 행동입니다.');
+            } else if (selectedOption === 'block') {
+                alert('메시지를 차단하고 삭제하는 것도 안전한 행동입니다.');
+            }
+        }
+
+        // 배경 변경 함수
+        function changeBackground(imageUrl) {
+            const body = document.getElementById('background');
+            body.style.backgroundImage = `url('${imageUrl}')`;
+        }
+    </script>
+</body>
+</html>

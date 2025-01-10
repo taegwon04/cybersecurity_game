@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정보 보안 게임</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #quizModal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 10;
+        }
+        #quizModal h2 {
+            margin-bottom: 15px;
+        }
+        #quizModal button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0099ff;
+            color: white;
+            cursor: pointer;
+        }
+        #quizModal button:hover {
+            background-color: #00FFFF;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="quizModal">
+    <h2 id="quizQuestion">바이러스와 백신 퀴즈</h2>
+    <p>컴퓨터에 바이러스가 퍼졌습니다! 아래 중 가장 먼저 해야 할 일은 무엇일까요?</p>
+    <button onclick="checkAnswer('update')">백신 프로그램 업데이트</button>
+    <button onclick="checkAnswer('install')">백신 프로그램 설치</button>
+    <button onclick="checkAnswer('scan')">컴퓨터 전체 검사</button>
+</div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const groundHeight = 50;
+        const groundY = canvas.height - groundHeight;
+
+        const player = {
+            x: 50,
+            y: groundY - 110,
+            width: 110,
+            height: 110,
+            velocityY: 0,
+            gravity: 1.2,
+            jumpPower: -30,
+            isJumping: false,
+            image: new Image()
+        };
+
+        const obstacles = [];
+        const obstacleImage = new Image();
+        obstacleImage.src = 'hacker1.png';
+        const MIN_OBSTACLE_DISTANCE = 900;
+
+        const locks = [];
+        const lockImage = new Image();
+        lockImage.src = 'lock.png';
+
+        const quizData = {
+            question: "파일을 보호하는 가장 좋은 방법은?",
+            options: ["암호화", "공유", "USB 저장"],
+            answer: "암호화"
+        };
+
+        const background = new Image();
+        background.src = 'background1.png';
+        let bgX1 = 0;
+        let bgX2 = canvas.width;
+
+        let isGameOver = false;
+        let isGameRunning = false;
+        let collectedLocks = 0;
+        let isObstacleLockActive = false; // 장애물 위 자물쇠 상태
+
+
+        const MAX_LOCKS = 12;
+        const MIN_LOCK_DISTANCE = 400; // 자물쇠 간 최소 거리
+        const MIN_LOCK_OBSTACLE_DISTANCE = 200; // 자물쇠와 장애물 간 최소 거리
+
+        const progressBar = {
+            x: 20,
+            y: 20,
+            width: 300,
+            height: 20
+        };
+
+        player.image.src = 'guard.png';
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background
+            ctx.drawImage(background, bgX1, 0, canvas.width, canvas.height);
+            ctx.drawImage(background, bgX2, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = "#00FFFF";
+            ctx.fillRect(0, groundY, canvas.width, groundHeight);
+
+            // Draw player
+            ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+
+            // Draw obstacles
+            obstacles.forEach(obstacle => {
+                ctx.drawImage(obstacleImage, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+
+            // Draw locks
+            locks.forEach(lock => {
+                ctx.drawImage(lockImage, lock.x, lock.y, lock.width, lock.height);
+            });
+
+            // Draw progress bar
+            drawProgressBar();
+        }
+
+        function drawProgressBar() {
+            ctx.fillStyle = 'grey';
+            ctx.fillRect(progressBar.x, progressBar.y, progressBar.width, progressBar.height);
+
+            const progressWidth = (collectedLocks / MAX_LOCKS) * progressBar.width;
+            ctx.fillStyle = 'green';
+            ctx.fillRect(progressBar.x, progressBar.y, progressWidth, progressBar.height);
+
+            ctx.strokeStyle = 'white';
+            ctx.strokeRect(progressBar.x, progressBar.y, progressBar.width, progressBar.height);
+        }
+
+        function updateBackground() {
+            bgX1 -= 2;
+            bgX2 -= 2;
+
+            if (bgX1 + canvas.width <= 0) {
+                bgX1 = canvas.width;
+            }
+
+            if (bgX2 + canvas.width <= 0) {
+                bgX2 = canvas.width;
+            }
+        }
+
+        function spawnObstacle() {
+            if (obstacles.length < 3) {
+                const lastObstacle = obstacles[obstacles.length - 1];
+                const obstacleX = lastObstacle ? Math.max(lastObstacle.x + MIN_OBSTACLE_DISTANCE, canvas.width) : canvas.width;
+                obstacles.push({
+                    x: obstacleX,
+                    y: groundY - 120,
+                    width: 120,
+                    height: 120
+                });
+            }
+        }
+
+        function spawnLock() {
+            spawnLockOnObstacle(); // 장애물 위 자물쇠 생성 시도
+            spawnLockOnGround();   // 바닥 자물쇠 생성
+        }
+
+        function spawnLockOnGround() {
+            if (locks.length < 5) {
+                let lockX, lockY = groundY - 70;
+                let isPositionValid = false;
+                let attempts = 0;
+                const maxAttempts = 10;
+
+                do {
+                    lockX = canvas.width + Math.random() * 500;
+
+                    // 자물쇠 간 거리 확인
+                    const tooCloseToOtherLocks = locks.some(
+                        lock => Math.abs(lockX - lock.x) < MIN_LOCK_DISTANCE
+                    );
+
+                    // 장애물과 거리 확인
+                    const tooCloseToObstacles = obstacles.some(
+                        obstacle => Math.abs(lockX - obstacle.x) < MIN_LOCK_OBSTACLE_DISTANCE
+                    );
+
+                    // 위치가 유효한지 확인
+                    isPositionValid = !tooCloseToOtherLocks && !tooCloseToObstacles;
+                    attempts++;
+                } while (!isPositionValid && attempts < maxAttempts);
+
+                // 위치가 유효하다면 자물쇠 추가
+                if (isPositionValid) {
+                    locks.push({
+                        x: lockX,
+                        y: lockY,
+                        width: 70,
+                        height: 70
+                    });
+                }
+            }
+        }
+
+        function spawnLockOnObstacle() {
+            obstacles.forEach(obstacle => {
+                if (!obstacle.hasLock && Math.random() < 0.5) { // 자물쇠가 없는 장애물에만 생성
+                    const lockX = obstacle.x + obstacle.width / 2 - 35;
+                    const lockY = obstacle.y - 250;
+
+                    // 기존 자물쇠와 중복 여부 확인
+                    const isPositionValid = !locks.some(lock =>
+                        Math.abs(lock.x - lockX) < 1 && Math.abs(lock.y - lockY) < 1
+                    );
+
+                    if (isPositionValid) {
+                        locks.push({ x: lockX, y: lockY, width: 70, height: 70 });
+                        obstacle.hasLock = true; // 자물쇠 생성 후 플래그 설정
+                    }
+                }
+            });
+        }
+
+
+
+
+
+
+        function updateLocks() {
+            locks.forEach((lock, index) => {
+                lock.x -= 8;
+
+                // 플레이어가 자물쇠를 먹었는지 확인
+                if (
+                    player.x < lock.x + lock.width &&
+                    player.x + player.width > lock.x &&
+                    player.y < lock.y + lock.height &&
+                    player.y + player.height > lock.y
+                ) {
+                    locks.splice(index, 1); // 자물쇠 제거
+                    collectedLocks += 1; // 자물쇠 개수 증가
+
+                    // MAX_LOCKS를 모두 모았을 때만 퀴즈를 띄움
+                    if (collectedLocks >= MAX_LOCKS) {
+                        alert('자물쇠를 다 모았습니다. 🎉🎊 퀴즈로 넘어갑니다!');
+                        showQuiz();
+                    }
+
+                    // 장애물 위 자물쇠 제거 시 플래그 해제
+                    isObstacleLockActive = false;
+                }
+
+                // 자물쇠가 화면 밖으로 나가면 제거
+                if (lock.x + lock.width < 0) {
+                    locks.splice(index, 1);
+
+                    // 장애물 위 자물쇠가 화면 밖으로 나가면 플래그 해제
+                    isObstacleLockActive = false;
+                }
+            });
+        }
+
+
+
+
+
+
+        function updateObstacles() {
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x -= 8;
+
+                if (obstacle.x + obstacle.width < 0) {
+                    obstacles.splice(index, 1);
+                }
+
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    isGameOver = true;
+                    alert('게임 종료!');
+                    resetGame();
+                }
+            });
+        }
+
+        function update() {
+            if (isGameOver) return;
+
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+
+            if (player.y > groundY - player.height) {
+                player.y = groundY - player.height;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            updateBackground();
+            updateObstacles();
+            updateLocks();
+            spawnObstacle();
+            spawnLock();
+        }
+
+        function showQuiz() {
+            isGameRunning = false;
+            const quizModal = document.getElementById('quizModal');
+            const quizQuestion = document.getElementById('quizQuestion');
+            const quizOptions = document.getElementById('quizOptions');
+
+            quizQuestion.textContent = quizData.question;
+            quizOptions.innerHTML = '';
+
+            quizData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                quizOptions.appendChild(button);
+            });
+
+            quizModal.style.display = 'block';
+        }
+
+        function checkAnswer(selectedOption) {
+            if (selectedOption === quizData.answer) {
+                alert('정답! 다음 스테이지로 이동합니다.');
+                window.location.href = 'stage2.html';
+            } else {
+                alert('오답입니다! 다시 시도하세요.');
+            }
+
+            document.getElementById('quizModal').style.display = 'none';
+            isGameRunning = true;
+            gameLoop();
+        }
+
+        function resetGame() {
+            isGameOver = false;
+            collectedLocks = 0;
+            locks.length = 0;
+            obstacles.length = 0;
+            player.y = groundY - player.height;
+            player.velocityY = 0;
+            startGame();
+        }
+
+        function startGame() {
+            if (isGameRunning) return;
+            isGameRunning = true;
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (!isGameRunning) return;
+
+            update();
+            render();
+
+            if (!isGameOver) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !player.isJumping) {
+                player.velocityY = player.jumpPower;
+                player.isJumping = true;
+            }
+        });
+
+        startGame();
+    </script>
+</body>
+</html>
+
+
+<div id="quizModal">
+    <h2 id="quizQuestion">바이러스와 백신 퀴즈</h2>
+    <p>컴퓨터에 바이러스가 퍼졌습니다! 아래 중 가장 먼저 해야 할 일은 무엇일까요?</p>
+    <button onclick="checkAnswer('update')">백신 프로그램 업데이트</button>
+    <button onclick="checkAnswer('install')">백신 프로그램 설치</button>
+    <button onclick="checkAnswer('scan')">컴퓨터 전체 검사</button>
+</div>
+
+<script>
+    function showQuiz() {
+    isGameRunning = false;
+    window.location.href = 'game_quiz1.html'; // 새로운 HTML 페이지로 이동
+}
+
+    function checkAnswer(selectedOption) {
+        const quizModal = document.getElementById('quizModal');
+        if (selectedOption === 'update') {
+            alert('정답입니다! 다음 스테이지로 이동합니다.');
+            window.location.href = 'stage2.html';
+        } else {
+            alert('오답입니다! 다시 시도하세요.');
+        }
+        quizModal.style.display = 'none';
+        isGameRunning = true;
+        gameLoop();
+    }
+</script>
+

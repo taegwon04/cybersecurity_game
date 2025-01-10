@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 완료</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('background3.png'); /* 성공 배경 이미지 */
+            background-size: cover;
+            background-position: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-align: center;
+        }
+        #messageContainer {
+            background: rgba(75, 0, 130, 0.8); /* 짙은 보라색 반투명 */
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.5);
+            animation: fadeIn 2s ease-in-out;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #FFD700; /* 금색 텍스트 */
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+        p {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #E6E6FA; /* 연한 보라색 */
+        }
+        button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            border: 2px solid #FFD700;
+            border-radius: 30px;
+            background-color: transparent;
+            color: #FFD700;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #FFD700;
+            color: #4B0082;
+            transform: scale(1.1);
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="messageContainer">
+        <h1>축하합니다!</h1>
+        <p>당신은 해커로부터 데이터 센터를 성공적으로 지켜냈습니다.<br>뛰어난 정보 보안 기술로 데이터의 안전을 보장했습니다 🎉🎊</p>
+        <button onclick="restartGame()">다시 시작하기</button>
+        <button onclick="closeGame()">종료하기</button>
+    </div>
+
+    <script>
+        function restartGame() {
+            window.location.href = 'index.html'; // 게임 시작 페이지로 이동
+        }
+
+        function closeGame() {
+            // 브라우저 닫기 요청 (일부 브라우저 제한 있음)
+            window.open('', '_self');
+            window.close();
+
+            // 안내 메시지로 대체
+            alert('브라우저의 닫기 버튼을 눌러 게임을 종료하세요.');
+        }
+    </script>
+</body>
+</html>
+

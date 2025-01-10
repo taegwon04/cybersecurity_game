@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비밀번호 설정 퀴즈</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-position: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            background-color: #9b59b6; /* 옅은 보라색 배경 */
+            transition: background 0.3s ease-in-out;
+        }
+        #quizContainer {
+            background: rgba(75, 0, 130, 0.9); /* 짙은 보라색 반투명 */
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.5); /* 네온 효과 */
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+        #quizContainer h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #E6E6FA; /* 연한 보라색 */
+        }
+        #quizContainer h2 span {
+            color: #FFD700; /* 강조된 금색 */
+            font-weight: bold;
+        }
+        #quizContainer p {
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        button {
+            margin: 10px 0;
+            padding: 12px 25px;
+            border: 2px solid #E6E6FA;
+            border-radius: 30px;
+            background-color: transparent;
+            color: #E6E6FA;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #E6E6FA;
+            color: #4B0082; /* 짙은 보라색 */
+            transform: scale(1.1);
+        }
+        #guardImage {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body id="background" style="background-image: url('background3.png');">
+    <div id="quizContainer">
+        <!-- Guard 이미지 -->
+        <img id="guardImage" src="guard.png" alt="Guard">
+
+        <h2><span>위기 상황: 데이터 센터의 비밀번호 설정!</span></h2>
+        <p>이번에 새로 가입한 사이트에 비밀번호를 설정하려 합니다. <br> 아래 중 가장 안전한 비밀번호는 무엇인가요?</p>
+        <button onclick="checkAnswer('A')">A. 12345password</button>
+        <button onclick="checkAnswer('B')">B. Qwerty123</button>
+        <button onclick="checkAnswer('C')">C. MyWebsite@2025!</button>
+        <button onclick="checkAnswer('D')">D. Password1</button>
+    </div>
+
+    <script>
+        function checkAnswer(selectedOption) {
+            if (selectedOption === 'C') {
+                alert('정답입니다! 웹사이트 이름, 숫자, 특수문자, 대소문자가 포함된 강력한 비밀번호입니다.');
+                window.location.href = 'final.html'; // 다음 스테이지로 이동
+            } else {
+                alert('오답입니다. 다시 생각해 보세요. 강력한 비밀번호는 대소문자, 숫자, 특수문자를 포함하고 고유해야 합니다.');
+            }
+        }
+
+        // 배경 변경 함수
+        function changeBackground(imageUrl) {
+            const body = document.getElementById('background');
+            body.style.backgroundImage = `url('${imageUrl}')`;
+        }
+    </script>
+</body>
+</html>

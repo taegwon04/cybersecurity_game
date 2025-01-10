@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 페이지</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('background1.png'); /* 스테이지 1의 배경 이미지 */
+            background-size: cover;
+            background-position: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        #quizContainer {
+            background: rgba(15, 15, 45, 0.8); /* 미래지향적 배경: 어두운 반투명 블록 */
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4); /* 네온 효과 */
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+        #quizContainer h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00FFFF; /* 네온 파란색 */
+        }
+        #quizContainer p {
+            margin-bottom: 30px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        button {
+            margin: 10px 0;
+            padding: 12px 25px;
+            border: 2px solid #00FFFF;
+            border-radius: 30px;
+            background-color: transparent;
+            color: #00FFFF;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #00FFFF;
+            color: black;
+            transform: scale(1.1);
+        }
+        #guardImage {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="quizContainer">
+        <!-- Guard 이미지 -->
+        <img id="guardImage" src="guard.png" alt="Guard">
+
+        <h2 id="quizQuestion">위기 상황: 데이터 센터의 바이러스!</h2>
+        <p id="quizText">해커가 데이터 센터의 주요 시스템에 바이러스를 심었습니다! 바이러스는 데이터를 손상시키기 전에 차단해야 합니다.<br> 어떻게 대처하시겠습니까?</p>
+        <button onclick="checkAnswer('shutdown')">데이터 센터의 모든 컴퓨터를 즉시 종료한다.</button>
+        <button onclick="checkAnswer('update')">최신 바이러스 백신을 업데이트한 후 전체 시스템을 검사한다.</button>
+        <button onclick="checkAnswer('connect')">감염된 시스템을 인터넷에 연결하여 도움을 요청한다.</button>
+    </div>
+
+    <script>
+        function checkAnswer(selectedOption) {
+            if (selectedOption === 'update') {
+                alert('정답입니다! 해커의 공격을 막았습니다. 다음 단계로 이동합니다.');
+                window.location.href = 'stage2.html'; // 다음 스테이지로 이동
+            } else {
+                alert('오답입니다! 데이터를 보호하지 못했습니다. 다시 시도하세요.');
+            }
+        }
+    </script>
+</body>
+</html>
