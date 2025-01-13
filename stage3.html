@@ -391,6 +391,23 @@
             }
         });
 
+        // 마우스 클릭으로 점프
+        canvas.addEventListener('mousedown', () => {
+            if (!player.isJumping) {
+                player.velocityY = player.jumpPower;
+                player.isJumping = true;
+            }
+        });
+
+        // 터치로 점프 (모바일 대응)
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 터치 기본 동작 방지
+            if (!player.isJumping) {
+                player.velocityY = player.jumpPower;
+                player.isJumping = true;
+            }
+        });
+
         startGame();
     </script>
 </body>
